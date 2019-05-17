@@ -77,6 +77,10 @@ function createWordBlank(wordArray) {
 }
 
 function newWord() {
+    if (misses === 6) {
+        document.getElementById("wordScore").innerHTML = '';
+    }
+
     let word = pickRandomWord(dictArray)
     wordArray = word.split('');
     wordArray.pop();
@@ -88,6 +92,7 @@ function newWord() {
 
     getDefinition(word);
 
+    document.getElementById("titleStatus").textContent = 'Last Words';
     document.getElementById("scaffoldImg").src = './resources/img/Hangman-0.png'; 
     document.getElementById("wordField").innerHTML = wordScreen.join(' ');
     document.getElementById("guessChars").innerHTML = ``;
@@ -101,10 +106,10 @@ window.addEventListener("keypress", attempt);
 function attempt(e) {
     let char = e.key;
 
-    if (!wordArray || gameOver === true) {
-        alert("Get a New Word!")
-        showAll();
-    }
+    // if (!wordArray || gameOver === true) {
+    //     alert("Get a New Word!")
+    //     showAll();
+    // }
 
     if (/[a-zA-Z]/.test(char) && gameOver === false) {
         if (wordArray.includes(char) ) {
@@ -135,11 +140,12 @@ function reveal(character, wordArray, wordScreen) {
     if (wordScreen.join('') === wordArray.join('')) {
         gameOver = true;
         setTimeout(function() {
-            alert("You win :)")
+            // alert("You win :)")
+            document.getElementById("titleStatus").textContent = 'Last Words!';
             score = scoreColor();
             document.getElementById("wordScore").innerHTML += '<li ' + score + '>' + wordScreen.join('') + '</li>';
             
-        }, 1000)
+        }, 0)
     }
 }
 
@@ -152,7 +158,7 @@ function scoreColor() {
     } else if (misses === 2) {
         score += 'green;\"';
     } else if (misses === 3) {
-        score += 'yellow;\"';
+        score += 'gold;\"';
     } else if (misses === 4) {
         score += 'orange;\"';
     } else if (misses === 5) {
@@ -177,10 +183,10 @@ function miss(character) {
     if (misses == 6) {
         gameOver = true;
         setTimeout(function() {
-            alert("GAME OVER :'(")
-            document.getElementById("wordScore").innerHTML = '';
+            // alert("GAME OVER :'(")
+            document.getElementById("titleStatus").textContent = 'Last Words...';
             showAll();
-        }, 1000)
+        }, 0)
     }
 }
 
