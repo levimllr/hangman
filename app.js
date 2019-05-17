@@ -16,6 +16,8 @@ let fetchUrl;
 let allText = readTextFile("./resources/words_alpha.txt")
 dictArray = createDictArray(allText);
 
+document.onload = newWord();
+
 function readTextFile(file)
 {
     var rawFile = new XMLHttpRequest();
