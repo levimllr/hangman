@@ -6,12 +6,11 @@ let guessArray = [];
 let missArray= [];
 let misses = 0;
 let gameOver = true;
-const appId = '1eb6bbf3';
-const appKey = '3b58ecb64ecd8432f41aa1142f8125e9';
-const language = 'en-us';
+const appKey = '87a85373-efd3-4950-b109-d1c0dfdb86e9';
 let wordId;
-const proxy = 'https://cors-anywhere.herokuapp.com/';
-const url = 'https://od-api.oxforddictionaries.com/api/v2/'
+let definition;
+const proxy = 'https://mighty-scrubland-31527.herokuapp.com/';
+const url = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
 let fetchUrl;
 
 let allText = readTextFile("./resources/words_alpha.txt")
@@ -42,12 +41,24 @@ function createDictArray(delimitedText) {
 }
 
 function getDefinition(word) {
-    fetchUrl = url + 'entries/' + language + '/' + word.toLowerCase() + '?fields=definitions';
-    console.log(fetchUrl);
+    fetchUrl = url + word.toLowerCase() + '?key=' + appKey;
     fetch((proxy + fetchUrl), {
         method: 'GET',
-        headers: {"app_id": appId, "app_key": appKey}
-    }).then(response => response.json()).then(response => console.log('Success: ', JSON.stringify(response)));
+    })
+    .then((response) => response.json())
+    .then(function(data) {
+        console.log(data);
+        if (data.length === 20) {
+            newWord();
+        } else {
+            try {
+                definition = data[0].shortdef.join(', ');
+            } catch {
+                newWord();
+            }
+        }
+        document.getElementById("definitionField").innerHTML = definition;
+    });
 }
 
 document.getElementById("newWord").addEventListener('click', newWord);
@@ -69,7 +80,6 @@ function newWord() {
     let word = pickRandomWord(dictArray)
     wordArray = word.split('');
     wordArray.pop();
-    console.log(wordArray);
     wordScreen = createWordBlank(wordArray);
     guessArray = [];
     missArray = [];
@@ -126,8 +136,29 @@ function reveal(character, wordArray, wordScreen) {
         gameOver = true;
         setTimeout(function() {
             alert("You win :)")
+            score = scoreColor();
+            document.getElementById("wordScore").innerHTML += '<li ' + score + '>' + wordScreen.join('') + '</li>';
+            
         }, 1000)
     }
+}
+
+function scoreColor() {
+    let score = 'style=\"color:';
+    if (misses === 0) {
+        score += 'purple;\"';
+    } else if (misses === 1) {
+        score += 'blue;\"';
+    } else if (misses === 2) {
+        score += 'green;\"';
+    } else if (misses === 3) {
+        score += 'yellow;\"';
+    } else if (misses === 4) {
+        score += 'orange;\"';
+    } else if (misses === 5) {
+        score += 'red;\"';
+    }
+    return score;
 }
 
 function showAll() {
@@ -140,13 +171,26 @@ function miss(character) {
         document.getElementById("missChars").innerHTML += `${character} `;
         misses += 1;
         document.getElementById("scaffoldImg").src = './resources/img/Hangman-' + misses + '.png'; 
+        document.getElementById("scaffoldImg").classList.add('missing');
     }
 
     if (misses == 6) {
         gameOver = true;
         setTimeout(function() {
             alert("GAME OVER :'(")
+            document.getElementById("wordScore").innerHTML = '';
             showAll();
         }, 1000)
     }
 }
+
+function missAccent() {
+
+}
+
+function removeTransition(event) {
+    if (event.propertyName !== 'transform') return;
+    this.classList.remove('missing');
+}
+
+document.getElementById("scaffoldImg").addEventListener('transitionend', removeTransition);

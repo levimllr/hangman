@@ -3,20 +3,43 @@
     <head>
         <meta charset="UTF-8">
         
-        <!-- <link type="text/css" rel="stylesheet" href="style.css"> -->
+        <link type="text/css" rel="stylesheet" href="style.css">
         <title>Hangman</title>
     </head>
     <body>
-        <div class="scaffold" id="scaffold">
-            <img id="scaffoldImg" src="./resources/img/Hangman-0.png">
+        <div class="header flex-container">
+            <div class="row lastWords">
+                <h2>Last Words</h2>
+                <ul id="wordScore"></ul>
+            </div>
+            <div class="scaffold" id="scaffold">
+                <img id="scaffoldImg" src="./resources/img/Hangman-0.png">
+            </div>
         </div>
         <div class="stats">
-            <div id="definition"><p>Definition: </p><p id="definitionField"></p></div>
-            <div id="word"><p>Word: </p><p id="wordField"></p></div>
-            <div id="guesses"><p>Guesses: </p><p id="guessChars"></p></div>
-            <div id="misses"><p>Misses: </p><p id="missChars"></p></div>
+            <div class="wordChallenge" id="definition">
+                <p id="gramEl">Definition</p>
+                <p  class="field definitionField" id="definitionField"></p>
+            </div>
+            <div class="wordWork">
+                <div class="preField" id="word">
+                    <p>Word</p>
+                    <p class="field" id="wordField"></p>
+                </div>
+                <div class="preField" id="guesses">
+                    <p>Guesses</p>
+                    <p class="field" id="guessChars"></p>
+                </div>
+                <div class="preField" id="misses">
+                    <p>Misses</p>
+                    <p class="field" id="missChars"></p>
+                </div>
+            </div>
         </div>
-        <button id="newWord">New Word</button>
+        <div class="buttons">
+            <button id="newWord">New Word</button>
+        </div>
+        
     </body>
 
     <script src="app.js"></script>
