@@ -6,69 +6,85 @@ let guessArray = [];
 let missArray= [];
 let misses = 0;
 let gameOver = true;
-const appKey = '87a85373-efd3-4950-b109-d1c0dfdb86e9';
+// const appKey = '87a85373-efd3-4950-b109-d1c0dfdb86e9';
 let wordId;
 let definition;
-const proxy = 'https://mighty-scrubland-31527.herokuapp.com/';
-const url = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
+// const proxy = 'https://mighty-scrubland-31527.herokuapp.com/';
+// const url = 'https://www.dictionaryapi.com/api/v3/references/collegiate/json/'
+const url = 'http://localhost:3000/random_word'
 let fetchUrl;
 
-let allText = readTextFile("./resources/words_alpha.txt")
-dictArray = createDictArray(allText);
+// let allText = readTextFile("./resources/words_alpha.txt")
+// dictArray = createDictArray(allText);
 
-document.onload = newWord();
+document.onload = getWord();
 
-function readTextFile(file)
-{
-    var rawFile = new XMLHttpRequest();
-    let allText;
-    rawFile.open("GET", file, false);
-    rawFile.onreadystatechange = function ()
-    {
-        if(rawFile.readyState === 4)
-        {
-            if(rawFile.status === 200 || rawFile.status == 0)
-            {
-                allText = rawFile.responseText;
-            }
-        }
-    }
-    rawFile.send(null);
-    return allText;
-}
+// function readTextFile(file)
+// {
+//     var rawFile = new XMLHttpRequest();
+//     let allText;
+//     rawFile.open("GET", file, false);
+//     rawFile.onreadystatechange = function ()
+//     {
+//         if(rawFile.readyState === 4)
+//         {
+//             if(rawFile.status === 200 || rawFile.status == 0)
+//             {
+//                 allText = rawFile.responseText;
+//             }
+//         }
+//     }
+//     rawFile.send(null);
+//     return allText;
+// }
 
-function createDictArray(delimitedText) {
-    dictArray = delimitedText.split('\n');
-    return dictArray;
-}
+// function createDictArray(delimitedText) {
+//     dictArray = delimitedText.split('\n');
+//     return dictArray;
+// }
 
-function getDefinition(word) {
-    fetchUrl = url + word.toLowerCase() + '?key=' + appKey;
-    fetch((proxy + fetchUrl), {
-        method: 'GET',
-    })
-    .then((response) => response.json())
-    .then(function(data) {
-        console.log(data);
-        if (data.length === 20) {
-            newWord();
-        } else {
-            try {
-                definition = data[0].shortdef.join(', ');
-            } catch {
-                newWord();
-            }
-        }
-        document.getElementById("definitionField").innerHTML = definition;
-    });
-}
+// function getDefinition(word) {
+//     fetchUrl = url + word.toLowerCase() + '?key=' + appKey;
+//     fetch((proxy + fetchUrl), {
+//         method: 'GET',
+//     })
+//     .then((response) => response.json())
+//     .then(function(data) {
+//         console.log(data);
+//         if (data.length === 20) {
+//             newWord();
+//         } else {
+//             try {
+//                 definition = data[0].shortdef.join(', ');
+//             } catch {
+//                 newWord();
+//             }
+//         }
+//         document.getElementById("definitionField").innerHTML = definition;
+//     });
+// }
 
-document.getElementById("newWord").addEventListener('click', newWord);
+function getWord() {
+    fetch(url)
+        .then(response => response.json())
+        .then(json => injectWord(json));
+};
 
-function pickRandomWord(dictArray) {
-    let index = Math.floor(Math.random() * Math.floor(dictArray.length));
-    return dictArray[index]
-}
+function injectWord(word){
+    newWord(word.name);
+
+    let definition = `${word.major_class} ${word.definition}`;
+    document.getElementById("definitionField").innerHTML = definition;
+
+
+};
+
+document.getElementById("newWord").addEventListener('click', getWord);
+
+// function pickRandomWord(dictArray) {
+//     let index = Math.floor(Math.random() * Math.floor(dictArray.length));
+//     return dictArray[index]
+// }
 
 function createWordBlank(wordArray) {
     wordScreen = [];
@@ -78,21 +94,19 @@ function createWordBlank(wordArray) {
     return wordScreen;
 }
 
-function newWord() {
+function newWord(fetchedWord) {
     if (misses === 6) {
         document.getElementById("wordScore").innerHTML = '';
     }
 
-    let word = pickRandomWord(dictArray)
+    let word = fetchedWord
     wordArray = word.split('');
-    wordArray.pop();
+    // wordArray.pop();
     wordScreen = createWordBlank(wordArray);
     guessArray = [];
     missArray = [];
     misses = 0;
     gameOver = false;
-
-    getDefinition(word);
 
     document.getElementById("titleStatus").textContent = 'Last Words';
     document.getElementById("scaffoldImg").src = './resources/img/Hangman-0.png'; 
