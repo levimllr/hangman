@@ -1,5 +1,6 @@
 const testWord = 'execution';
 const wordList = 'a'
+let wordObject;
 let wordArray = [];
 let wordScreen = [];
 let guessArray = [];
@@ -71,11 +72,11 @@ function getWord() {
 };
 
 function injectWord(word){
+    wordObject = word;
     newWord(word.name);
 
     let definition = `${word.major_class} ${word.definition}`;
     document.getElementById("definitionField").innerHTML = definition;
-
 
 };
 
@@ -99,7 +100,7 @@ function newWord(fetchedWord) {
         document.getElementById("wordScore").innerHTML = '';
     }
 
-    let word = fetchedWord
+    word = fetchedWord;
     wordArray = word.split('');
     // wordArray.pop();
     wordScreen = createWordBlank(wordArray);
@@ -158,12 +159,18 @@ function reveal(character, wordArray, wordScreen) {
         setTimeout(function() {
             // alert("You win :)")
             document.getElementById("titleStatus").textContent = 'Last Words!';
-            score = scoreColor();
-            document.getElementById("wordScore").innerHTML += '<li ' + score + '>' + wordScreen.join('') + '</li>';
+            score = scoreCalculator(wordObject);
+            scoreStyle = scoreColor();
+            document.getElementById("wordScore").innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${score})</li>`;
             
         }, 0)
     }
 }
+
+function scoreCalculator(word) {
+    let score = word.points + word.name.length - (2 * misses);
+    return score;
+};
 
 function scoreColor() {
     let score = 'style=\"color:';
