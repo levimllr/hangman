@@ -1,4 +1,4 @@
-let round = 1;
+let round;
 let roundWords = [];
 let wordObject;
 let wordArray = [];
@@ -11,39 +11,53 @@ let wordId;
 let definition;
 const url = 'http://localhost:3000/random_words'
 
-// on document load, get words!
-document.onload = getWords();
+// on document load, start game!
+document.onload = startGame();
+
+// fetch words any time the "New Word" button is clicked
+document.getElementById("newGame").addEventListener('click', startGame);
+// assess an attempt with every keypress
+window.addEventListener("keypress", attempt);
+
+// GETs random set of words, appends one to DOM 
+function startGame() {
+    round = 1;
+    document.getElementById("wordScore").innerHTML = '';
+    getWords().then(() => injectWord(roundWords[round - 1]));
+};
+
 
 // fetches words from last-words-backend API and saves in roundWords
-function getWords() {
-    fetch(url)
+async function getWords() {
+    await fetch(url)
         .then(response => response.json())
         .then(json => saveWords(json));
 };
 
+// saves an array of word objects in roundWords
 function saveWords(json){
     roundWords = json;
 };
 
+// "injects" the contents of a word object into the DOM
 function injectWord(word){
     wordObject = word;
     newWord(word.name);
 
     let definition = `${word.major_class} ${word.definition}`;
     document.getElementById("definitionField").innerHTML = definition;
-
 };
 
-document.getElementById("newWord").addEventListener('click', getWords);
-
-function createWordBlank(wordArray) {
+// creates the word blank
+function createWordScreen(wordArray) {
     wordScreen = [];
     for (let char = 0; char < wordArray.length; char++) {
         wordScreen.push('_')
     }
     return wordScreen;
-}
+};
 
+// returns array of the word's characters, as well as its screen (i.e. _ _ _ _)
 function newWord(fetchedWord) {
     if (misses === 6) {
         document.getElementById("wordScore").innerHTML = '';
@@ -51,7 +65,7 @@ function newWord(fetchedWord) {
 
     word = fetchedWord;
     wordArray = word.split('');
-    wordScreen = createWordBlank(wordArray);
+    wordScreen = createWordScreen(wordArray);
     guessArray = [];
     missArray = [];
     misses = 0;
@@ -64,9 +78,9 @@ function newWord(fetchedWord) {
     document.getElementById("missChars").innerHTML = ``;
 
     return wordArray, wordScreen;
-}
+};
 
-window.addEventListener("keypress", attempt);
+
 
 function attempt(e) {
     let char = e.key;
@@ -77,38 +91,44 @@ function attempt(e) {
             reveal(char, wordArray, wordScreen);
         } else {
             miss(char);
-        }
-    }
-}
+        };
+    };
+};
 
 function guess(character) {
     if (!guessArray.includes(character)) {
         guessArray.push(character);
         document.getElementById("guessChars").innerHTML += `${character} `;
-    }
-}
+    };
+};
 
 function reveal(character, wordArray, wordScreen) {
     for (let i = 0; i < wordArray.length; i++) {
         if (character === wordArray[i]) {
             wordScreen[i] = wordArray[i];
-        }
-    }
+        };
+    };
 
     document.getElementById("wordField").innerHTML = wordScreen.join(' ');
     
     if (wordScreen.join('') === wordArray.join('')) {
         gameOver = true;
         setTimeout(function() {
-            // alert("You win :)")
+            round += 1
             document.getElementById("titleStatus").textContent = 'Last Words!';
             score = scoreCalculator(wordObject);
             scoreStyle = scoreColor();
             document.getElementById("wordScore").innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${score})</li>`;
-            
-        }, 0)
-    }
-}
+        }, 0);
+        setTimeout(function() {
+            if (round < 5) {
+                injectWord(roundWords[round - 1]);
+            } else {
+                getWords().then(() => injectWord(roundWords[round - 1]));
+            };
+        }, 3000);
+    };
+};
 
 function scoreCalculator(word) {
     let score = word.points + word.name.length - (2 * misses);
@@ -154,10 +174,6 @@ function miss(character) {
             showAll();
         }, 0)
     }
-}
-
-function missAccent() {
-
 }
 
 function removeTransition(event) {
