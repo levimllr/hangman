@@ -1,5 +1,5 @@
-const testWord = 'execution';
-const wordList = 'a'
+let round = 1;
+let roundWords = [];
 let wordObject;
 let wordArray = [];
 let wordScreen = [];
@@ -7,18 +7,22 @@ let guessArray = [];
 let missArray= [];
 let misses = 0;
 let gameOver = true;
-let round = 1;
 let wordId;
 let definition;
 const url = 'http://localhost:3000/random_words'
-let fetchUrl;
 
-document.onload = getWord();
+// on document load, get words!
+document.onload = getWords();
 
-function getWord() {
+// fetches words from last-words-backend API and saves in roundWords
+function getWords() {
     fetch(url)
         .then(response => response.json())
-        .then(json => injectWord(json));
+        .then(json => saveWords(json));
+};
+
+function saveWords(json){
+    roundWords = json;
 };
 
 function injectWord(word){
@@ -30,7 +34,7 @@ function injectWord(word){
 
 };
 
-document.getElementById("newWord").addEventListener('click', getWord);
+document.getElementById("newWord").addEventListener('click', getWords);
 
 function createWordBlank(wordArray) {
     wordScreen = [];
