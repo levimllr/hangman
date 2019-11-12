@@ -9,44 +9,59 @@ let wordScreen = [];
 let guessArray = [];
 let missArray= [];
 let misses = 0;
+let gameName = ["_", "_", "_"];
 let gameOver = true;
 let wordId;
 let definition;
-const url = 'http://localhost:3000/words/random'
+const domain = 'http://localhost:3000'
+
+const modal = document.getElementById("modal");
+const modalHeader = document.getElementById("modal-header");
 
 // on document load, open modal!
-
-	
-const modal = document.getElementById("modal");
+document.onload = toggleModal();
 
 function toggleModal() {
     modal.classList.toggle("show-modal");
 };
 
-function windowOnClick(event) {
-    if (event.target === modal) {
-        toggleModal();
-    }
-};
-
-window.addEventListener("click", windowOnClick);
-
-document.onload = toggleModal();
-
 // fetch words any time the "New Word" button is clicked
-document.getElementById("newGame").addEventListener('click', startGame);
+document.getElementById("newGame").addEventListener('click', reset);
 
 // assess an attempt with every keypress
 window.addEventListener("keypress", attempt);
+
+function reset() {
+    gameName = ["_", "_", "_"];
+    modalHeader.innerHTML = 'Any last words, _ _ _?';
+    toggleModal();
+};
 
 // GETs random set of words, appends one to DOM 
 function startGame() {
     document.getElementById("gameInfo").innerHTML = '';
     round = 0;
     totalScore = 0;
+    postGame();
     startRound();
     document.getElementById(`wordScore-${round}`).innerHTML = '';
     document.getElementById("totalScore").innerHTML = "Total Score: 0";
+};
+
+function postGame() {
+    let url = domain + "/games"
+    let data = {
+        username: gameName.join(""),
+        total_score: totalScore
+    };
+    fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
 };
 
 // starts a round by incrementing the round counter, 
@@ -58,7 +73,6 @@ function startRound() {
     appendRoundHeaderScore(round);
     getWords(roundLength).then(() => spinTheWheel(injectWord));
 };
-
 
 function appendRoundHeaderScore(round){
     let roundHeader = document.createElement("h3");
@@ -72,18 +86,19 @@ function appendRoundHeaderScore(round){
 
 // fetches words from last-words-backend API and saves in roundWords
 async function getWords() {
+    let url = domain + '/words/random'
     await fetch(url)
         .then(response => response.json())
         .then(json => saveWords(json));
 };
 
 // saves an array of word objects in roundWords
-function saveWords(json){
+function saveWords(json) {
     roundWords = json;
 };
 
 // "injects" the contents of a word object into the DOM
-function injectWord(){
+function injectWord() {
     roundWordsIndex = Math.floor(Math.random() * roundWords.length);
     wordObject = roundWords[roundWordsIndex];
     console.log(roundWordsIndex);
@@ -151,15 +166,27 @@ function newWord(fetchedWord) {
 };
 
 
-function attempt(e) {
-    let char = e.key.toLowerCase();
+async function attempt(e) {
+    let char = e.key;
 
     if (/[a-zA-Z]/.test(char) && gameOver === false) {
+        char = char.toLowerCase();
         if (wordArray.includes(char) ) {
             guess(char);
             reveal(char, wordArray, wordScreen);
         } else {
             miss(char);
+        };
+    } else if (/[a-zA-Z]/.test(char) && gameOver === true)  {
+        char = char.toUpperCase();
+        let index = gameName.indexOf("_");
+        gameName[index] = char;
+        gameNameString = gameName.join(" ");
+        modalHeader.innerHTML = `Any last words, ${gameNameString}?`
+        if (index == 2 || index == -1) {
+            await sleep(500);
+            toggleModal();
+            startGame();
         };
     };
 };

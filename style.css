@@ -91,6 +91,7 @@ button {
     visibility: hidden;
     transform: scale(1.1);
     transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+    text-align: center;
 }
 .modal-content {
     position: absolute;
@@ -99,7 +100,7 @@ button {
     transform: translate(-50%, -50%);
     background-color: white;
     padding: 1rem 1.5rem;
-    width: 24rem;
+    width: 30rem;
     border-radius: 0.5rem;
 }
 .close-button {
@@ -119,4 +120,7 @@ button {
     visibility: visible;
     transform: scale(1.0);
     transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
+}
+#modal-header {
+    font-family: 'Courier New', Courier, monospace;
 }
