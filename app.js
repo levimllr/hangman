@@ -46,6 +46,18 @@ window.addEventListener("keypress", attempt);
 function reset() {
     gameName = ["_", "_", "_"];
     modalHeader.innerHTML = 'Any last words, _ _ _?';
+    game = {
+        id: null,
+        username: null,
+        total_score: 0
+    };
+    gameWord = {
+        game_id: null,
+        word_id: null,
+        misses: null,
+        win: null,
+        score: null
+    };
     toggleModal();
 };
 
@@ -107,14 +119,30 @@ async function postGameWord(gameWord) {
     ).then(
         json => gameWord.score = json.score
     );
-    game.totalScore += gameWord.score;
+    game.total_score += gameWord.score;
     scoreStyle = scoreColor();
     document.getElementById(`wordScore-${round}`).innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${gameWord.score})</li>`;
-    document.getElementById("totalScore").innerHTML = `Total Score: ${game.totalScore}`
+    document.getElementById("totalScore").innerHTML = `Total Score: ${game.total_score}`;
 };
 
-function updateGame() {
-
+async function updateGame() {
+    let url = domain + `/games/${game.id}`;
+    let data = {
+        game: game
+    };
+    console.log(data);
+    await fetch(url, {
+        method: 'PATCH',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(
+        response => response.json()
+    ).then(
+        json => console.log(json)
+    );
 };
 
 // starts a round by incrementing the round counter, 
@@ -263,7 +291,7 @@ function reveal(character, wordArray, wordScreen) {
         setTimeout(function() {
             document.getElementById("titleStatus").textContent = 'Last Words!';
             setGameWord(true);
-            postGameWord(gameWord);
+            postGameWord(gameWord).then(() => updateGame());
         }, 0);
         setTimeout(function() {
             roundWordIndex += 1;
