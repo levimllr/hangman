@@ -1,6 +1,6 @@
 let round = 0;
 let roundWordIndex = 1;
-let roundLength = 2;
+let roundLength = 3;
 let roundWords = [];
 let totalScore = 0;
 let wordObject;
@@ -12,7 +12,7 @@ let misses = 0;
 let gameOver = true;
 let wordId;
 let definition;
-const url = 'http://localhost:3000/random_words'
+const url = 'http://localhost:3000/words/random'
 
 // on document load, start game!
 document.onload = startGame();
@@ -27,8 +27,10 @@ window.addEventListener("keypress", attempt);
 function startGame() {
     document.getElementById("gameInfo").innerHTML = '';
     round = 0;
+    totalScore = 0;
     startRound();
     document.getElementById(`wordScore-${round}`).innerHTML = '';
+    document.getElementById("totalScore").innerHTML = "Total Score: 0";
 };
 
 // starts a round by incrementing the round counter, 
@@ -36,8 +38,9 @@ function startGame() {
 // and fetching and setting up a word
 function startRound() {
     round += 1;
+    roundWordIndex = 1;
     appendRoundHeaderScore(round);
-    getWords(roundLength).then(() => injectWord(roundWords[roundWordIndex - 1]));
+    getWords(roundLength).then(() => spinTheWheel(injectWord));
 };
 
 
@@ -45,7 +48,7 @@ function appendRoundHeaderScore(round){
     let roundHeader = document.createElement("h3");
     roundHeader.setAttribute("id", `round${round}header`);
     let roundScores = document.createElement("ul");
-    roundScores.setAttribute("id", )
+    roundScores.setAttribute("id", `wordScore-${round}`)
     roundHeader.innerHTML = `Round ${round}`
     document.getElementById("gameInfo").append(roundHeader);
     document.getElementById(`round${round}header`).append(roundScores);
@@ -64,12 +67,28 @@ function saveWords(json){
 };
 
 // "injects" the contents of a word object into the DOM
-function injectWord(word){
-    wordObject = word;
-    newWord(word.name);
+function injectWord(){
+    roundWordsIndex = Math.floor(Math.random() * roundWords.length);
+    wordObject = roundWords[roundWordsIndex];
+    console.log(roundWordsIndex);
+    console.log(wordObject.name);
 
-    let definition = `${word.major_class} ${word.definition}`;
+    newWord(wordObject.name);
+
+    let definition = `${wordObject.major_class} ${wordObject.definition}`;
     document.getElementById("definitionField").innerHTML = definition;
+};
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+async function spinTheWheel(fn) {
+    console.log("Injecting!");
+    let nTimes = Math.floor(Math.random()*5) + 5;
+    for (let n = 0; n < nTimes; n++) {
+        await sleep(250).then(() => fn());
+    };
 };
 
 // creates the word blank
@@ -156,11 +175,11 @@ function reveal(character, wordArray, wordScreen) {
         setTimeout(function() {
             roundWordIndex += 1;
             if (roundWordIndex <= roundLength) {
-                injectWord(roundWords[roundWordIndex - 1]);
+                spinTheWheel(injectWord);
             } else {
                 startRound();
             };
-        }, 3000);
+        }, 2000);
     };
 };
 
