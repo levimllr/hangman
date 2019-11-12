@@ -14,8 +14,24 @@ let wordId;
 let definition;
 const url = 'http://localhost:3000/words/random'
 
-// on document load, start game!
-document.onload = startGame();
+// on document load, open modal!
+
+	
+const modal = document.getElementById("modal");
+
+function toggleModal() {
+    modal.classList.toggle("show-modal");
+};
+
+function windowOnClick(event) {
+    if (event.target === modal) {
+        toggleModal();
+    }
+};
+
+window.addEventListener("click", windowOnClick);
+
+document.onload = toggleModal();
 
 // fetch words any time the "New Word" button is clicked
 document.getElementById("newGame").addEventListener('click', startGame);
@@ -79,13 +95,15 @@ function injectWord(){
     document.getElementById("definitionField").innerHTML = definition;
 };
 
+// pause the execution of a function for ms time
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
+// repeatedly execute a fn between 5 and 10 times 
 async function spinTheWheel(fn) {
     console.log("Injecting!");
-    let nTimes = Math.floor(Math.random()*5) + 5;
+    let nTimes = Math.floor(Math.random() * 5) + 5;
     for (let n = 0; n < nTimes; n++) {
         await sleep(250).then(() => fn());
     };
