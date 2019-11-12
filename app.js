@@ -1,5 +1,8 @@
-let round;
+let round = 0;
+let roundWordIndex = 1;
+let roundLength = 2;
 let roundWords = [];
+let totalScore = 0;
 let wordObject;
 let wordArray = [];
 let wordScreen = [];
@@ -16,16 +19,37 @@ document.onload = startGame();
 
 // fetch words any time the "New Word" button is clicked
 document.getElementById("newGame").addEventListener('click', startGame);
+
 // assess an attempt with every keypress
 window.addEventListener("keypress", attempt);
 
 // GETs random set of words, appends one to DOM 
 function startGame() {
-    round = 1;
-    document.getElementById("wordScore").innerHTML = '';
-    getWords().then(() => injectWord(roundWords[round - 1]));
+    document.getElementById("gameInfo").innerHTML = '';
+    round = 0;
+    startRound();
+    document.getElementById(`wordScore-${round}`).innerHTML = '';
 };
 
+// starts a round by incrementing the round counter, 
+// appending a round header to the gameInfo div,
+// and fetching and setting up a word
+function startRound() {
+    round += 1;
+    appendRoundHeaderScore(round);
+    getWords(roundLength).then(() => injectWord(roundWords[roundWordIndex - 1]));
+};
+
+
+function appendRoundHeaderScore(round){
+    let roundHeader = document.createElement("h3");
+    roundHeader.setAttribute("id", `round${round}header`);
+    let roundScores = document.createElement("ul");
+    roundScores.setAttribute("id", )
+    roundHeader.innerHTML = `Round ${round}`
+    document.getElementById("gameInfo").append(roundHeader);
+    document.getElementById(`round${round}header`).append(roundScores);
+};
 
 // fetches words from last-words-backend API and saves in roundWords
 async function getWords() {
@@ -51,16 +75,25 @@ function injectWord(word){
 // creates the word blank
 function createWordScreen(wordArray) {
     wordScreen = [];
-    for (let char = 0; char < wordArray.length; char++) {
-        wordScreen.push('_')
-    }
+    wordArray.forEach((character) => {
+        if (isLetter(character)) {
+            wordScreen.push('_')
+        } else {
+            wordScreen.push(character)
+        }
+    });
     return wordScreen;
 };
+
+// returns true if character is a letter (numbers are unchanged by case methods)
+function isLetter(c) {
+    return c.toLowerCase() != c.toUpperCase();
+}
 
 // returns array of the word's characters, as well as its screen (i.e. _ _ _ _)
 function newWord(fetchedWord) {
     if (misses === 6) {
-        document.getElementById("wordScore").innerHTML = '';
+        document.getElementById(`wordScore-${round}`).innerHTML = '';
     }
 
     word = fetchedWord;
@@ -81,9 +114,8 @@ function newWord(fetchedWord) {
 };
 
 
-
 function attempt(e) {
-    let char = e.key;
+    let char = e.key.toLowerCase();
 
     if (/[a-zA-Z]/.test(char) && gameOver === false) {
         if (wordArray.includes(char) ) {
@@ -114,17 +146,19 @@ function reveal(character, wordArray, wordScreen) {
     if (wordScreen.join('') === wordArray.join('')) {
         gameOver = true;
         setTimeout(function() {
-            round += 1
             document.getElementById("titleStatus").textContent = 'Last Words!';
             score = scoreCalculator(wordObject);
+            totalScore += score;
             scoreStyle = scoreColor();
-            document.getElementById("wordScore").innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${score})</li>`;
+            document.getElementById(`wordScore-${round}`).innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${score})</li>`;
+            document.getElementById("totalScore").innerHTML = `Total Score: ${totalScore}`
         }, 0);
         setTimeout(function() {
-            if (round < 5) {
-                injectWord(roundWords[round - 1]);
+            roundWordIndex += 1;
+            if (roundWordIndex <= roundLength) {
+                injectWord(roundWords[roundWordIndex - 1]);
             } else {
-                getWords().then(() => injectWord(roundWords[round - 1]));
+                startRound();
             };
         }, 3000);
     };
