@@ -14,6 +14,18 @@ let gameOver = true;
 let wordId;
 let definition;
 const domain = 'http://localhost:3000'
+let game = {
+    id: null,
+    username: null,
+    total_score: 0
+};
+let gameWord = {
+    game_id: null,
+    word_id: null,
+    misses: null,
+    win: null,
+    score: null
+};
 
 const modal = document.getElementById("modal");
 const modalHeader = document.getElementById("modal-header");
@@ -39,9 +51,10 @@ function reset() {
 
 // GETs random set of words, appends one to DOM 
 function startGame() {
+    game.username = gameName.join("");
     document.getElementById("gameInfo").innerHTML = '';
     round = 0;
-    totalScore = 0;
+    game.totalScore = 0;
     postGame();
     startRound();
     document.getElementById(`wordScore-${round}`).innerHTML = '';
@@ -51,8 +64,8 @@ function startGame() {
 function postGame() {
     let url = domain + "/games"
     let data = {
-        username: gameName.join(""),
-        total_score: totalScore
+        username: game.username,
+        total_score: game.total_score
     };
     fetch(url, {
         method: 'POST',
@@ -61,7 +74,47 @@ function postGame() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    });
+    }).then(
+        response => response.json()
+    ).then(
+        json => game.id = json.id
+    );
+};
+
+function setGameWord(winBoolean) {
+    console.log("Setting")
+    gameWord.game_id = game.id
+    gameWord.word_id = wordObject.id
+    gameWord.misses = missArray.join("")
+    gameWord.win = winBoolean 
+};
+
+async function postGameWord(gameWord) {
+    let url = domain + `/games/${game.id}/game_words`;
+    let data = {
+        game_word: gameWord
+    };
+    console.log(data);
+    await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(
+        response => response.json()
+    ).then(
+        json => gameWord.score = json.score
+    );
+    game.totalScore += gameWord.score;
+    scoreStyle = scoreColor();
+    document.getElementById(`wordScore-${round}`).innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${gameWord.score})</li>`;
+    document.getElementById("totalScore").innerHTML = `Total Score: ${game.totalScore}`
+};
+
+function updateGame() {
+
 };
 
 // starts a round by incrementing the round counter, 
@@ -101,11 +154,8 @@ function saveWords(json) {
 function injectWord() {
     roundWordsIndex = Math.floor(Math.random() * roundWords.length);
     wordObject = roundWords[roundWordsIndex];
-    console.log(roundWordsIndex);
     console.log(wordObject.name);
-
     newWord(wordObject.name);
-
     let definition = `${wordObject.major_class} ${wordObject.definition}`;
     document.getElementById("definitionField").innerHTML = definition;
 };
@@ -182,7 +232,7 @@ async function attempt(e) {
         let index = gameName.indexOf("_");
         gameName[index] = char;
         gameNameString = gameName.join(" ");
-        modalHeader.innerHTML = `Any last words, ${gameNameString}?`
+        modalHeader.innerHTML = `Any last words, ${gameNameString} ?`
         if (index == 2 || index == -1) {
             await sleep(500);
             toggleModal();
@@ -208,14 +258,12 @@ function reveal(character, wordArray, wordScreen) {
     document.getElementById("wordField").innerHTML = wordScreen.join(' ');
     
     if (wordScreen.join('') === wordArray.join('')) {
+        console.log("Correct!!");
         gameOver = true;
         setTimeout(function() {
             document.getElementById("titleStatus").textContent = 'Last Words!';
-            score = scoreCalculator(wordObject);
-            totalScore += score;
-            scoreStyle = scoreColor();
-            document.getElementById(`wordScore-${round}`).innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${score})</li>`;
-            document.getElementById("totalScore").innerHTML = `Total Score: ${totalScore}`
+            setGameWord(true);
+            postGameWord(gameWord);
         }, 0);
         setTimeout(function() {
             roundWordIndex += 1;
