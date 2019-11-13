@@ -26,26 +26,84 @@ let gameWord = {
     win: null,
     score: null
 };
+let highScores = [];
 
-const modal = document.getElementById("modal");
-const modalHeader = document.getElementById("modal-header");
+const gameModal = document.getElementById("gameModal");
+const gameModalHeader = document.getElementById("gameModalHeader");
+const scoreModal = document.getElementById("scoreModal");
+const scoreModalList = document.getElementById("scoreList");
 
 // on document load, open modal!
-document.onload = toggleModal();
+document.onload = toggleGameModal();
+document.onload = fetchHighScores();
 
-function toggleModal() {
-    modal.classList.toggle("show-modal");
+
+
+function fetchHighScores() {
+    let resource = "/games/high_scores"
+    let url = domain + resource;
+    fetch(url).then(response => response.json()).then(json => populateScores(json))
 };
 
-// fetch words any time the "New Word" button is clicked
-document.getElementById("newGame").addEventListener('click', reset);
+let rankMap = ["0TH", "1ST", "2ND", "3RD", "4TH", "5TH", "6TH", "7TH", "8TH", "9TH", "10TH"];
+
+function populateScores(json) {
+    scoreModalList.innerHTML = "";
+    console.log(json);
+    let rank = 1;
+    json.forEach( (score) => {
+        let scoreString = formatScore(score.total_score);
+        let scoreItem = document.createElement("li");
+        scoreItem.setAttribute("class", "modal-list-item");
+        scoreItem.setAttribute("style", scoreColor(rank - 1));
+        scoreItem.innerHTML = `${rankMap[rank]}...${scoreString}...${score.username}`;
+        scoreModalList.appendChild(scoreItem);
+        rank += 1;
+    });
+};
+
+function formatScore(score) {
+    let scoreString = `${score}`;
+    scoreStringArray = scoreString.split("");
+    if (scoreString.length < 4) {
+        while (scoreStringArray.length < 4) {
+            scoreStringArray.unshift("0");
+        };
+    };
+    scoreString = scoreStringArray.join("");
+    return scoreString;
+};
+
+function toggleGameModal() {
+    gameModal.classList.toggle("show-modal");
+};
+
+function toggleScoreModal() {
+    scoreModal.classList.toggle("show-modal");
+};
+
+const closeButton = document.querySelector(".close-button");
+
+function windowOnClick(event) {
+    if (event.target === scoreModal) {
+        toggleModal();
+    }
+}
+
+closeButton.addEventListener("click", toggleScoreModal);
+window.addEventListener("click", windowOnClick);
+
+// reset the game any time the "New Word" button is clicked
+document.getElementById("newGameButton").addEventListener('click', reset);
+// show scores any time the "High Scores" button is clicked
+document.getElementById("highScoreButton").addEventListener('click', toggleScoreModal);
 
 // assess an attempt with every keypress
 window.addEventListener("keypress", attempt);
 
 function reset() {
     gameName = ["_", "_", "_"];
-    modalHeader.innerHTML = 'Any last words, _ _ _?';
+    gameModalHeader.innerHTML = 'Any last words, _ _ _?';
     game = {
         id: null,
         username: null,
@@ -58,7 +116,7 @@ function reset() {
         win: null,
         score: null
     };
-    toggleModal();
+    toggleGameModal();
 };
 
 // GETs random set of words, appends one to DOM 
@@ -120,8 +178,13 @@ async function postGameWord(gameWord) {
         json => gameWord.score = json.score
     );
     game.total_score += gameWord.score;
-    scoreStyle = scoreColor();
-    document.getElementById(`wordScore-${round}`).innerHTML += `<li ${scoreStyle}>${wordScreen.join('')} (${gameWord.score})</li>`;
+    scoreStyle = scoreColor(misses);
+    let wordScore = document.getElementById(`wordScore-${round}`);
+    let wordScoreItem = document.createElement("li");
+    wordScoreItem.setAttribute("id", `wordScoreItem-${roundWordIndex}`)
+    wordScoreItem.innerHTML = `${wordScreen.join('')} (${gameWord.score})`;
+    wordScoreItem.setAttribute("style", scoreStyle); 
+    wordScore.appendChild(wordScoreItem);
     document.getElementById("totalScore").innerHTML = `Total Score: ${game.total_score}`;
 };
 
@@ -260,10 +323,10 @@ async function attempt(e) {
         let index = gameName.indexOf("_");
         gameName[index] = char;
         gameNameString = gameName.join(" ");
-        modalHeader.innerHTML = `Any last words, ${gameNameString} ?`
+        gameModalHeader.innerHTML = `Any last words, ${gameNameString} ?`
         if (index == 2 || index == -1) {
             await sleep(500);
-            toggleModal();
+            toggleGameModal();
             startGame();
         };
     };
@@ -309,20 +372,20 @@ function scoreCalculator(word) {
     return score;
 };
 
-function scoreColor() {
-    let score = 'style=\"color:';
-    if (misses === 0) {
-        score += 'purple;\"';
-    } else if (misses === 1) {
-        score += 'blue;\"';
-    } else if (misses === 2) {
-        score += 'green;\"';
-    } else if (misses === 3) {
-        score += 'gold;\"';
-    } else if (misses === 4) {
-        score += 'orange;\"';
-    } else if (misses === 5) {
-        score += 'red;\"';
+function scoreColor(index) {
+    let score = 'color:';
+    if (index === 0) {
+        score += 'purple';
+    } else if (index === 1) {
+        score += 'blue';
+    } else if (index === 2) {
+        score += 'green';
+    } else if (index === 3) {
+        score += 'gold';
+    } else if (index === 4) {
+        score += 'orange';
+    } else if (index === 5) {
+        score += 'red';
     }
     return score;
 }
@@ -346,6 +409,7 @@ function miss(character) {
             // alert("GAME OVER :'(")
             document.getElementById("titleStatus").textContent = 'Last Words...';
             showAll();
+            fetchHighScores();
         }, 0)
     }
 }

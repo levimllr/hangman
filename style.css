@@ -103,10 +103,13 @@ button {
     width: 30rem;
     border-radius: 0.5rem;
 }
+.score-modal-content {
+    width: 15em;
+}
 .close-button {
     float: right;
-    width: 1.5rem;
-    line-height: 1.5rem;
+    width: 1.2rem;
+    line-height: 1.2rem;
     text-align: center;
     cursor: pointer;
     border-radius: 0.25rem;
@@ -121,6 +124,16 @@ button {
     transform: scale(1.0);
     transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
 }
-#modal-header {
+.modal-header,
+#scoreList {
     font-family: 'Courier New', Courier, monospace;
+}
+.modal-list {
+    text-align: center;
+    list-style: none;
+    padding: 0;
+}
+.modal-list-item {
+    padding-bottom: 1em;
+    font-weight: bold;
 }
