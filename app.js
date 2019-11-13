@@ -109,6 +109,7 @@ document.getElementById("highScoreButton").addEventListener('click', toggleScore
 window.addEventListener("keypress", attempt);
 
 function reset() {
+    gameOver = true;
     newGame = true;
     gameName = ["_", "_", "_"];
     gameModalHeader.innerHTML = 'Any last words, _ _ _?';
@@ -341,12 +342,14 @@ async function attempt(e) {
     };
 };
 
+
 function guess(character) {
     if (!guessArray.includes(character)) {
         guessArray.push(character);
         document.getElementById("guessChars").innerHTML += `${character} `;
     };
 };
+
 
 function reveal(character, wordArray, wordScreen) {
     for (let i = 0; i < wordArray.length; i++) {
