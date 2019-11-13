@@ -11,6 +11,7 @@ let missArray= [];
 let misses = 0;
 let gameName = ["_", "_", "_"];
 let gameOver = true;
+let newGame = true;
 let wordId;
 let definition;
 const domain = 'http://localhost:3000'
@@ -108,6 +109,7 @@ document.getElementById("highScoreButton").addEventListener('click', toggleScore
 window.addEventListener("keypress", attempt);
 
 function reset() {
+    newGame = true;
     gameName = ["_", "_", "_"];
     gameModalHeader.innerHTML = 'Any last words, _ _ _?';
     game = {
@@ -324,13 +326,14 @@ async function attempt(e) {
         } else {
             miss(char);
         };
-    } else if (/[a-zA-Z]/.test(char) && gameOver === true)  {
+    } else if (/[a-zA-Z]/.test(char) && newGame === true)  {
         char = char.toUpperCase();
         let index = gameName.indexOf("_");
         gameName[index] = char;
         gameNameString = gameName.join(" ");
         gameModalHeader.innerHTML = `Any last words, ${gameNameString} ?`
         if (index == 2 || index == -1) {
+            newGame = false;
             await sleep(500);
             toggleGameModal();
             startGame();
