@@ -38,7 +38,6 @@ document.onload = toggleGameModal();
 document.onload = fetchHighScores();
 
 
-
 function fetchHighScores() {
     let resource = "/games/high_scores"
     let url = domain + resource;
@@ -62,6 +61,7 @@ function populateScores(json) {
     });
 };
 
+
 function formatScore(score) {
     let scoreString = `${score}`;
     scoreStringArray = scoreString.split("");
@@ -74,19 +74,23 @@ function formatScore(score) {
     return scoreString;
 };
 
+
 function toggleGameModal() {
     gameModal.classList.toggle("show-modal");
 };
+
 
 function toggleScoreModal() {
     scoreModal.classList.toggle("show-modal");
 };
 
+
 const closeButton = document.querySelector(".close-button");
+
 
 function windowOnClick(event) {
     if (event.target === scoreModal) {
-        toggleModal();
+        toggleScoreModal();
     }
 }
 
