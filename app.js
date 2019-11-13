@@ -28,6 +28,8 @@ let gameWord = {
 };
 let highScores = [];
 
+const gameInfoDiv = document.getElementById("gameInfo");
+
 const gameModal = document.getElementById("gameModal");
 const gameModalHeader = document.getElementById("gameModalHeader");
 const scoreModal = document.getElementById("scoreModal");
@@ -126,7 +128,6 @@ function reset() {
 // GETs random set of words, appends one to DOM 
 function startGame() {
     game.username = gameName.join("");
-    document.getElementById("gameInfo").innerHTML = '';
     round = 0;
     game.totalScore = 0;
     postGame();
@@ -216,6 +217,7 @@ async function updateGame() {
 // appending a round header to the gameInfo div,
 // and fetching and setting up a word
 function startRound() {
+    gameInfoDiv.innerHTML = '';
     round += 1;
     roundWordIndex = 1;
     appendRoundHeaderScore(round);
@@ -228,7 +230,7 @@ function appendRoundHeaderScore(round){
     let roundScores = document.createElement("ul");
     roundScores.setAttribute("id", `wordScore-${round}`)
     roundHeader.innerHTML = `Round ${round}`
-    document.getElementById("gameInfo").append(roundHeader);
+    gameInfoDiv.append(roundHeader);
     document.getElementById(`round${round}header`).append(roundScores);
 };
 
