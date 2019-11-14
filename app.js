@@ -20,9 +20,11 @@ let game = {
     username: null,
     total_score: 0
 };
+let gameWordsArray = [];
 let gameWord = {
     game_id: null,
     word_id: null,
+    word: null,
     misses: null,
     win: null,
     score: null
@@ -164,6 +166,7 @@ function postGame() {
 function setGameWord(winBoolean) {
     gameWord.game_id = game.id;
     gameWord.word_id = wordObject.id;
+    gameWord.word = wordObject.name;
     gameWord.misses = missArray.join("");
     gameWord.win = winBoolean;
 };
@@ -186,6 +189,8 @@ async function postGameWord(gameWord) {
     ).then(
         json => gameWord.score = json.score
     );
+    // {...gameWord} makes a shallow copy of gameWord
+    gameWordsArray.push({...gameWord});
     appendGameWord();
 };
 
@@ -451,10 +456,39 @@ function miss(character) {
         setTimeout(function() {
             // alert("GAME OVER :'(")
             document.getElementById("titleStatus").textContent = 'Last Words...';
+            gameInfoDiv.innerHTML= "";
+            let wordScores = gameWordsArray.map(gameWord => gameWord.score);
+            console.log(wordScores);
+            let bestWord = highestScoringWord(wordScores);
+            console.log(bestWord);
+            let bestWordHeader = document.createElement("h3");
+            bestWordHeader.innerText = `Best: ${bestWord.word} (${bestWord.score})`;
+            let worstWord = lowestScoringWord(wordScores);
+            let worstWordHeader = document.createElement("h3");
+            worstWordHeader.innerText = `Worst: ${worstWord.word} (${worstWord.score})`;
+            let roundsHeader = document.createElement("h3");
+            roundsHeader.innerText = `Rounds: ${round}`
+            gameInfoDiv.appendChild(bestWordHeader);
+            gameInfoDiv.appendChild(worstWordHeader);
+            gameInfoDiv.appendChild(roundsHeader);
             showAll();
             fetchHighScores();
         }, 0);
     };
+};
+
+function highestScoringWord(wordScores) {
+    let highestScore = Math.max(...wordScores);
+    let indexOfHighestScore = wordScores.indexOf(highestScore);
+    let highestWord = gameWordsArray[indexOfHighestScore];
+    return highestWord;
+};
+
+function lowestScoringWord(wordScores) {
+    let lowestScore = Math.min(...wordScores);
+    let indexOfLowestScore = wordScores.indexOf(lowestScore);
+    let lowestWord = gameWordsArray[indexOfLowestScore];
+    return lowestWord;
 };
 
 // remove the CSS class giving the expansion animation of the hangman
