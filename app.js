@@ -345,6 +345,7 @@ function attempt(e) {
 
 // fill out gameName and trigger game start when game name complete
 async function inputGameName(character) {
+    document.getElementById("gameModalHeader").classList.add('missing');
     let char = character.toUpperCase();
     let index = gameName.indexOf("_");
     gameName[index] = char;
@@ -357,6 +358,9 @@ async function inputGameName(character) {
         startGame();
     };
 };
+
+// trigger the removal of the CSS class transition when the transition finishes 
+document.getElementById("gameModalHeader").addEventListener('transitionend', removeTransition);
 
 // "guess" char by pushing it onto guessArray if not present (only if correct)
 function guess(character) {

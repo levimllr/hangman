@@ -33,7 +33,8 @@ ul {
     text-align: center;
 }
 
-#scaffoldImg {
+#scaffoldImg,
+#gameModalHeader {
     transition: all .07s ease;
 }
 
