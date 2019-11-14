@@ -224,7 +224,13 @@ function startRound() {
     round += 1;
     roundWordIndex = 1;
     appendRoundHeaderScore(round);
-    getWords(roundLength).then(() => spinTheWheel(injectWord));
+    getWords(roundLength)
+        .then(() => spinTheWheel(injectWord))
+        .then(() => {
+            console.log("removing");
+            wordObjectIndex = roundWords.indexOf(wordObject);
+            roundWords.splice(wordObjectIndex, 1);
+        });
 };
 
 function appendRoundHeaderScore(round){
@@ -371,7 +377,11 @@ function reveal(character, wordArray, wordScreen) {
         setTimeout(function() {
             roundWordIndex += 1;
             if (roundWordIndex <= roundLength) {
-                spinTheWheel(injectWord);
+                spinTheWheel(injectWord).then(() => {
+                    console.log("removing");
+                    wordObjectIndex = roundWords.indexOf(wordObject);
+                    roundWords.splice(wordObjectIndex, 1);
+                });
             } else {
                 startRound();
             };
