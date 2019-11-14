@@ -327,7 +327,7 @@ function resetHangmanWork() {
 };
 
 // check an answer attempt: input game name or guess and hit or miss if playing
-async function attempt(e) {
+function attempt(e) {
     let char = e.key;
 
     if (/[a-zA-Z]/.test(char) && gameOver === false) {
@@ -339,13 +339,13 @@ async function attempt(e) {
             miss(char);
         };
     } else if (/[a-zA-Z]/.test(char) && newGame === true)  {
-        inputGameName();
+        inputGameName(char);
     };
 };
 
 // fill out gameName and trigger game start when game name complete
-function inputGameName() {
-    char = char.toUpperCase();
+async function inputGameName(character) {
+    let char = character.toUpperCase();
     let index = gameName.indexOf("_");
     gameName[index] = char;
     gameNameString = gameName.join(" ");
@@ -366,7 +366,7 @@ function guess(character) {
     };
 };
 
-
+// reveal a character in wordScreen if it's in wordAray and check for win
 function reveal(character, wordArray, wordScreen) {
     for (let i = 0; i < wordArray.length; i++) {
         if (character === wordArray[i]) {
@@ -376,6 +376,11 @@ function reveal(character, wordArray, wordScreen) {
 
     document.getElementById("wordField").innerHTML = wordScreen.join(' ');
     
+    checkWin();
+};
+
+// check to see if the word is won!
+function checkWin() {
     if (wordScreen.join('') === wordArray.join('')) {
         gameOver = true;
         setTimeout(function() {
@@ -397,11 +402,13 @@ function reveal(character, wordArray, wordScreen) {
     };
 };
 
+// return calculated score based on word points, length, and number of misses
 function scoreCalculator(word) {
     let score = word.points + word.name.length - (2 * misses);
     return score;
 };
 
+// return score style string in accordance with number of misses
 function scoreColor(index) {
     let score = 'color:';
     if (index === 0) {
@@ -418,12 +425,14 @@ function scoreColor(index) {
         score += 'red';
     }
     return score;
-}
+};
 
+// show the word in the word field
 function showAll() {
     document.getElementById("wordField").innerHTML = wordArray.join(' ');
-}
+};
 
+// handle a miss and a loss
 function miss(character) {
     if (!missArray.includes(character)) {
         missArray.push(character);
@@ -431,7 +440,7 @@ function miss(character) {
         misses += 1;
         document.getElementById("scaffoldImg").src = './resources/img/Hangman-' + misses + '.png'; 
         document.getElementById("scaffoldImg").classList.add('missing');
-    }
+    };
 
     if (misses == 6) {
         gameOver = true;
@@ -440,13 +449,15 @@ function miss(character) {
             document.getElementById("titleStatus").textContent = 'Last Words...';
             showAll();
             fetchHighScores();
-        }, 0)
-    }
+        }, 0);
+    };
 };
 
+// remove the CSS class giving the expansion animation of the hangman
 function removeTransition(event) {
     if (event.propertyName !== 'transform') return;
     this.classList.remove('missing');
 };
 
+// trigger the removal of the CSS class transition when the transition finishes 
 document.getElementById("scaffoldImg").addEventListener('transitionend', removeTransition);
