@@ -14,7 +14,7 @@ let gameOver = true;
 let newGame = true;
 let wordId;
 let definition;
-const domain = 'http://localhost:3000'
+const domain = 'https://last-words-on-rails.herokuapp.com'
 let game = {
     id: null,
     username: null,
@@ -37,6 +37,7 @@ const gameModal = document.getElementById("gameModal");
 const gameModalHeader = document.getElementById("gameModalHeader");
 const scoreModal = document.getElementById("scoreModal");
 const scoreModalList = document.getElementById("scoreList");
+const totalScoreHeader = document.getElementById("totalScore");
 
 // on document load, open new game modal and fetch high scores!
 document.onload = toggleGameModal();
@@ -55,6 +56,7 @@ function populateScores(json) {
     scoreModalList.innerHTML = "";
     let rank = 1;
     json.forEach( (score) => {
+        highScores.push(score);
         let scoreString = formatScore(score.total_score);
         let scoreItem = document.createElement("li");
         scoreItem.setAttribute("class", "modal-list-item");
@@ -113,6 +115,7 @@ window.addEventListener("keypress", attempt);
 function reset() {
     gameOver = true;
     newGame = true;
+    gameWordsArray = [];
     gameName = ["_", "_", "_"];
     gameModalHeader.innerHTML = 'Any last words, _ _ _?';
     game = {
@@ -138,7 +141,7 @@ function startGame() {
     postGame();
     startRound();
     document.getElementById(`wordScore-${round}`).innerHTML = '';
-    document.getElementById("totalScore").innerHTML = "Total Score: 0";
+    totalScoreHeader.innerHTML = "Total Score: 0";
 };
 
 // POSTs new game to API and updates local object
@@ -204,7 +207,7 @@ function appendGameWord() {
     wordScoreItem.innerHTML = `${wordScreen.join('')} (${gameWord.score})`;
     wordScoreItem.setAttribute("style", scoreStyle); 
     wordScore.appendChild(wordScoreItem);
-    document.getElementById("totalScore").innerHTML = `Total Score: ${game.total_score}`;
+    totalScoreHeader.innerHTML = `Total Score: ${game.total_score}`;
 };
 
 // PATCH game in API with new winnings
@@ -458,9 +461,7 @@ function miss(character) {
             document.getElementById("titleStatus").textContent = 'Last Words...';
             gameInfoDiv.innerHTML= "";
             let wordScores = gameWordsArray.map(gameWord => gameWord.score);
-            console.log(wordScores);
             let bestWord = highestScoringWord(wordScores);
-            console.log(bestWord);
             let bestWordHeader = document.createElement("h3");
             bestWordHeader.innerText = `Best: ${bestWord.word} (${bestWord.score})`;
             let worstWord = lowestScoringWord(wordScores);
@@ -468,9 +469,15 @@ function miss(character) {
             worstWordHeader.innerText = `Worst: ${worstWord.word} (${worstWord.score})`;
             let roundsHeader = document.createElement("h3");
             roundsHeader.innerText = `Rounds: ${round}`
+
             gameInfoDiv.appendChild(bestWordHeader);
             gameInfoDiv.appendChild(worstWordHeader);
             gameInfoDiv.appendChild(roundsHeader);
+
+            if (game.total_score > highScores[6].total_score) {
+                totalScoreHeader.innerHTML = `High Score! ${game.total_score}`;
+            };
+
             showAll();
             fetchHighScores();
         }, 0);
