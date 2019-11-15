@@ -303,8 +303,8 @@ function createWordScreen(wordArray) {
 
 // return true if character is a letter (numbers are unchanged by case methods)
 function isLetter(c) {
-    return c.toLowerCase() != c.toUpperCase();
-}
+    return c.toLowerCase() !== c.toUpperCase();
+};
 
 // return array of the word's characters, as well as its screen (i.e. _ _ _ _)
 function newWord(fetchedWord) {
