@@ -461,14 +461,21 @@ function miss(character) {
             document.getElementById("titleStatus").textContent = 'Last Words...';
             gameInfoDiv.innerHTML= "";
             let wordScores = gameWordsArray.map(gameWord => gameWord.score);
+            
             let bestWord = highestScoringWord(wordScores);
             let bestWordHeader = document.createElement("h3");
             bestWordHeader.innerText = `Best: ${bestWord.word} (${bestWord.score})`;
+            bestWordHeader.setAttribute("style", scoreColor(bestWord.misses.length));
+
             let worstWord = lowestScoringWord(wordScores);
             let worstWordHeader = document.createElement("h3");
             worstWordHeader.innerText = `Worst: ${worstWord.word} (${worstWord.score})`;
+            worstWordHeader.setAttribute("style", scoreColor(worstWord.misses.length));
+
             let roundsHeader = document.createElement("h3");
-            roundsHeader.innerText = `Rounds: ${round}`
+            roundsHeader.innerText = `Rounds: ${round}`;
+            let roundValue = Math.abs(round - 7);
+            roundsHeader.setAttribute("style", scoreColor(roundValue));
 
             gameInfoDiv.appendChild(bestWordHeader);
             gameInfoDiv.appendChild(worstWordHeader);
