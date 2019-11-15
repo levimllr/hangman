@@ -337,6 +337,10 @@ function resetHangmanWork() {
 // check an answer attempt: input game name or guess and hit or miss if playing
 function attempt(e) {
     let char = e.key;
+    console.log(e);
+    if (e.keyCode == 13) {
+        return
+    };
 
     if (/[a-zA-Z]/.test(char) && gameOver === false) {
         char = char.toLowerCase();
